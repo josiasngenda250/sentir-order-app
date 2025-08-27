@@ -88,10 +88,14 @@ export default function Page() {
       });
       const data = await res.json();
 
+      // 👇 See exactly what the API returned (IDs or error messages)
+      console.log("ORDER RESPONSE", data);
+
       if (!res.ok) {
         throw new Error(data?.error || "Failed to place order");
       }
 
+      // If emails had issues, show details before redirecting
       if (data.customerEmailError || data.adminEmailError) {
         const issues = [
           data.customerEmailError ? `Customer email error: ${data.customerEmailError}` : "",
@@ -102,11 +106,14 @@ export default function Page() {
         alert(
           "Order saved successfully, but there was an issue sending one or more emails:\n\n" +
             issues +
-            "\n\nYou can still proceed; we’ll re-send manually if needed."
+            "\n\nWe will re-send manually if needed."
         );
       }
 
-      window.location.href = "/success";
+      // Delay so you can read the console log
+      setTimeout(() => {
+        window.location.href = "/success";
+      }, 1500);
     } catch (err: any) {
       setMsg(err?.message || "Something went wrong.");
     } finally {
