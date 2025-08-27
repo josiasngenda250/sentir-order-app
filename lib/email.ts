@@ -11,8 +11,8 @@ function getResend(): Resend {
 }
 
 function getFrom(): string {
-  // Keep onboarding@resend.dev for testing; switch to your verified domain later.
-  return process.env.FROM_EMAIL || "onboarding@resend.dev";
+  // now that your domain is verified, always send from it
+  return process.env.FROM_EMAIL || "orders@sentircanada.store";
 }
 
 function getAdmins(): string[] {
@@ -21,22 +21,10 @@ function getAdmins(): string[] {
 }
 
 function htmlToText(html: string): string {
-  // Basic HTML → text fallback (improves deliverability)
   return html.replace(/<br\/?>/gi, "\n").replace(/<[^>]+>/g, "").trim();
 }
 
-/** Make any Resend error readable (no more [object Object]) */
-function formatResendError(scope: "customer" | "admin", err: unknown): string {
-  try {
-    if (typeof err === "string") return `Resend(${scope}): ${err}`;
-    if (err instanceof Error) return `Resend(${scope}): ${err.message}`;
-    return `Resend(${scope}): ${JSON.stringify(err)}`;
-  } catch {
-    return `Resend(${scope}): ${String(err)}`;
-  }
-}
-
-/** Send the customer confirmation email; returns Resend message id. */
+/** Send the customer confirmation email. Returns Resend message id. */
 export async function sendCustomerEmail(to: string, html: string): Promise<string> {
   if (!to) throw new Error("Customer recipient email is empty");
 
@@ -50,16 +38,16 @@ export async function sendCustomerEmail(to: string, html: string): Promise<strin
     subject: "Thanks for your order — Sentir",
     html,
     text,
-    reply_to: from, // correct field name for Resend SDK
+    reply_to: from, // correct key for Resend SDK
   });
 
-  if (error) throw new Error(formatResendError("customer", error));
+  if (error) throw new Error(`Resend(customer): ${error.message ?? String(error)}`);
   const id = data?.id;
   if (!id) throw new Error("Resend(customer): missing message id");
   return id;
 }
 
-/** Send the admin notification email to all configured admins; returns Resend message id. */
+/** Send the admin notification email. Returns Resend message id. */
 export async function sendAdminEmail(html: string, subject: string): Promise<string> {
   const admins = getAdmins();
   if (!admins.length) throw new Error("ADMIN_EMAILS is empty");
@@ -74,10 +62,10 @@ export async function sendAdminEmail(html: string, subject: string): Promise<str
     subject,
     html,
     text,
-    reply_to: from, // correct field name
+    reply_to: from,
   });
 
-  if (error) throw new Error(formatResendError("admin", error));
+  if (error) throw new Error(`Resend(admin): ${error.message ?? String(error)}`);
   const id = data?.id;
   if (!id) throw new Error("Resend(admin): missing message id");
   return id;
