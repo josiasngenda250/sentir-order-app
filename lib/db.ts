@@ -1,4 +1,3 @@
-// lib/db.ts
 import { sql } from "@vercel/postgres";
 
 export type OrderRow = {
@@ -26,7 +25,7 @@ export type OrderRow = {
 };
 
 export async function ensureSchema(){
-  // Enable extension for gen_random_uuid()
+  // Needed for gen_random_uuid()
   await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto;`;
   await sql`
     CREATE TABLE IF NOT EXISTS sentir_orders (
@@ -51,5 +50,6 @@ export async function ensureSchema(){
       order_total int NOT NULL,
       payment_method text NOT NULL,
       requests text
-    );`;
+    );
+  `;
 }
