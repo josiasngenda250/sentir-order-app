@@ -1,3 +1,4 @@
+// lib/db.ts
 import { sql } from "@vercel/postgres";
 
 export type OrderRow = {
@@ -25,28 +26,30 @@ export type OrderRow = {
 };
 
 export async function ensureSchema(){
+  // Enable extension for gen_random_uuid()
+  await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto;`;
   await sql`
-  CREATE TABLE IF NOT EXISTS sentir_orders (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    created_at timestamptz DEFAULT now(),
-    full_name text NOT NULL,
-    email text NOT NULL,
-    phone text,
-    preferred_contact text,
-    addr1 text NOT NULL,
-    addr2 text,
-    city text NOT NULL,
-    province text NOT NULL,
-    postal text NOT NULL,
-    country text NOT NULL,
-    product text NOT NULL,
-    product_code text NOT NULL,
-    quantity int NOT NULL,
-    shipping_option text NOT NULL,
-    shipping_cost int NOT NULL,
-    item_subtotal int NOT NULL,
-    order_total int NOT NULL,
-    payment_method text NOT NULL,
-    requests text
-  );`;
+    CREATE TABLE IF NOT EXISTS sentir_orders (
+      id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+      created_at timestamptz DEFAULT now(),
+      full_name text NOT NULL,
+      email text NOT NULL,
+      phone text,
+      preferred_contact text,
+      addr1 text NOT NULL,
+      addr2 text,
+      city text NOT NULL,
+      province text NOT NULL,
+      postal text NOT NULL,
+      country text NOT NULL,
+      product text NOT NULL,
+      product_code text NOT NULL,
+      quantity int NOT NULL,
+      shipping_option text NOT NULL,
+      shipping_cost int NOT NULL,
+      item_subtotal int NOT NULL,
+      order_total int NOT NULL,
+      payment_method text NOT NULL,
+      requests text
+    );`;
 }
